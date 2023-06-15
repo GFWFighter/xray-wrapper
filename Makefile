@@ -1,2 +1,2 @@
-ios:
-	@gomobile bind -o ./build/XRay.xcframework -target=ios -ldflags="-s -w" -v ./
+apple:
+	@gomobile bind -o ./build/XRay.xcframework -target=ios,macos,iossimulator -ldflags="-s -w" -v ./
