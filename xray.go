@@ -67,6 +67,7 @@ type Instance struct {
 	instance   *core.Instance
 	configPath string
 	port       int
+	apiPort    int
 	logger     *L.Logger
 }
 
@@ -164,6 +165,7 @@ func NewInstance(configPath string, assetPath string, enableAPI bool, logger Log
 		}
 		config.Inbound = []*core.InboundHandlerConfig{json, apiJson}
 	} else {
+		apiPort = -1
 		config.Inbound = []*core.InboundHandlerConfig{json}
 	}
 	if err != nil {
@@ -180,6 +182,7 @@ func NewInstance(configPath string, assetPath string, enableAPI bool, logger Log
 		configPath: configPath,
 		port:       port,
 		logger:     logContainer,
+		apiPort:    apiPort,
 	}, nil
 }
 
