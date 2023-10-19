@@ -127,7 +127,7 @@ func getInboundConfig(port int) string {
 		"\"sniffing\":{\"enabled\":true,\"destOverride\": [\"fakedns+others\"]}}"
 }
 
-func New(configPath string, assetPath string, logger Logger) (*Instance, error) {
+func NewInstance(configPath string, assetPath string, logger Logger) (*Instance, error) {
 	os.Setenv("XRAY_LOCATION_ASSET", assetPath)
 	os.Setenv("XRAY_LOCATION_CONFIG", configPath)
 	port, err := getPort()
