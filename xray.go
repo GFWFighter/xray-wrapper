@@ -89,16 +89,24 @@ func registerLoader() {
 	})
 }
 
-func getPort() (int, error) {
+func getPort() (int, int, error) {
 	listener, err := net.Listen("tcp", "[::1]:0")
 	if err != nil {
-		return -1, err
+		return -1, -1, err
+	}
+	listener2, err := net.Listen("tcp", "[::1]:0")
+	if err != nil {
+		return -1, -1, err
 	}
 	err = listener.Close()
 	if err != nil {
-		return -1, err
+		return -1, -1, err
 	}
-	return listener.Addr().(*net.TCPAddr).Port, nil
+	err = listener2.Close()
+	if err != nil {
+		return -1, -1, err
+	}
+	return listener.Addr().(*net.TCPAddr).Port, listener2.Addr().(*net.TCPAddr).Port, nil
 }
 
 func decodeJSON(config string) (*core.InboundHandlerConfig, error) {
@@ -127,10 +135,16 @@ func getInboundConfig(port int) string {
 		"\"sniffing\":{\"enabled\":true,\"destOverride\": [\"fakedns+others\"]}}"
 }
 
-func New(configPath string, assetPath string, logger Logger) (*Instance, error) {
+func getAPInboundConfig(port int) string {
+	return "{\"listen\":\"127.0.0.1\",\"port\":" + strconv.Itoa(port) +
+		",\"protocol\":\"dokodemo-door\",\"tag\":\"api\"," +
+		"\"settings\":{\"address\":\"127.0.0.1\"}}"
+}
+
+func New(configPath string, assetPath string, enableAPI bool, logger Logger) (*Instance, error) {
 	os.Setenv("XRAY_LOCATION_ASSET", assetPath)
 	os.Setenv("XRAY_LOCATION_CONFIG", configPath)
-	port, err := getPort()
+	port, apiPort, err := getPort()
 	file, err := os.OpenFile(filepath.Join(configPath, "config.json"), os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err
@@ -143,7 +157,15 @@ func New(configPath string, assetPath string, logger Logger) (*Instance, error) 
 	if err != nil {
 		return nil, err
 	}
-	config.Inbound = []*core.InboundHandlerConfig{json}
+	if enableAPI {
+		apiJson, err := decodeJSON(getAPInboundConfig(apiPort))
+		if err != nil {
+			return nil, err
+		}
+		config.Inbound = []*core.InboundHandlerConfig{json, apiJson}
+	} else {
+		config.Inbound = []*core.InboundHandlerConfig{json}
+	}
 	if err != nil {
 		return nil, err
 	}
