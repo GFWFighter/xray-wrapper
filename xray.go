@@ -141,7 +141,7 @@ func getAPInboundConfig(port int) string {
 		"\"settings\":{\"address\":\"127.0.0.1\"}}"
 }
 
-func New(configPath string, assetPath string, enableAPI bool, logger Logger) (*Instance, error) {
+func NewInstance(configPath string, assetPath string, enableAPI bool, logger Logger) (*Instance, error) {
 	os.Setenv("XRAY_LOCATION_ASSET", assetPath)
 	os.Setenv("XRAY_LOCATION_CONFIG", configPath)
 	port, apiPort, err := getPort()
