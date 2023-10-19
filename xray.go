@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -126,7 +127,7 @@ func getInboundConfig(port int) string {
 		"\"sniffing\":{\"enabled\":true,\"destOverride\": [\"fakedns+others\"]}}"
 }
 
-func NewInstance(configPath string, assetPath string, logger Logger) (*Instance, error) {
+func New(configPath string, assetPath string, logger Logger) (*Instance, error) {
 	os.Setenv("XRAY_LOCATION_ASSET", assetPath)
 	os.Setenv("XRAY_LOCATION_CONFIG", configPath)
 	port, err := getPort()
@@ -180,4 +181,16 @@ func (i *Instance) Stop() error {
 
 func (i *Instance) GetPort() int {
 	return i.port
+}
+
+func SetMemoryLimit(enabled bool) {
+	const memoryLimit = 45 * 1024 * 1024
+	const memoryLimitGo = memoryLimit / 1.5
+	if enabled {
+		runtimeDebug.SetGCPercent(10)
+		runtimeDebug.SetMemoryLimit(memoryLimitGo)
+	} else {
+		runtimeDebug.SetGCPercent(100)
+		runtimeDebug.SetMemoryLimit(math.MaxInt64)
+	}
 }
