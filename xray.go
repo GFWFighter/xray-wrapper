@@ -206,3 +206,7 @@ func (i *Instance) Stop() error {
 func (i *Instance) GetPort() int {
 	return i.port
 }
+
+func (i *Instance) GetAPIPort() int {
+	return i.apiPort
+}
