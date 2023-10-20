@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/xtls/xray-core v1.8.4
 	golang.org/x/mobile v0.0.0-20231006135142-2b44d11868fe
+	golang.org/x/sys v0.13.0
 )
 
 require (
@@ -40,7 +41,6 @@ require (
 	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.16.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
