@@ -1,22 +1,15 @@
 package XRay
 
 import (
-	"bytes"
-	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	runtimeDebug "runtime/debug"
-	"strconv"
-	"strings"
 
 	L "github.com/gfwfighter/xray-wrapper/log"
 	"github.com/xtls/xray-core/common/log"
-	"github.com/xtls/xray-core/common/net"
 	"github.com/xtls/xray-core/core"
-	"github.com/xtls/xray-core/infra/conf"
-	J "github.com/xtls/xray-core/infra/conf/json"
 	"github.com/xtls/xray-core/infra/conf/serial"
 
 	_ "github.com/xtls/xray-core/app/dispatcher"
@@ -65,8 +58,6 @@ import (
 type Instance struct {
 	instance   *core.Instance
 	configPath string
-	port       int
-	apiPort    int
 	logger     *L.Logger
 }
 
@@ -89,84 +80,15 @@ func registerLoader() {
 	})
 }
 
-func getPort() (int, int, error) {
-	listener, err := net.Listen("tcp", "[::1]:0")
-	if err != nil {
-		return -1, -1, err
-	}
-	listener2, err := net.Listen("tcp", "[::1]:0")
-	if err != nil {
-		return -1, -1, err
-	}
-	err = listener.Close()
-	if err != nil {
-		return -1, -1, err
-	}
-	err = listener2.Close()
-	if err != nil {
-		return -1, -1, err
-	}
-	return listener.Addr().(*net.TCPAddr).Port, listener2.Addr().(*net.TCPAddr).Port, nil
-}
-
-func decodeJSON(config string) (*core.InboundHandlerConfig, error) {
-	reader := strings.NewReader(config)
-	jsonConfig := &conf.InboundDetourConfig{}
-	jsonContent := bytes.NewBuffer(make([]byte, 0, 10240))
-	jsonReader := io.TeeReader(&J.Reader{
-		Reader: reader,
-	}, jsonContent)
-	decoder := json.NewDecoder(jsonReader)
-	err := decoder.Decode(jsonConfig)
-	if err != nil {
-		return nil, err
-	}
-	result, err := jsonConfig.Build()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-func getInboundConfig(port int) string {
-	return "{\"listen\":\"[::1]\",\"port\":" + strconv.Itoa(port) +
-		",\"protocol\":\"socks\",\"tag\":\"socks-in\"," +
-		"\"settings\":{\"auth\":\"noauth\",\"udp\":true}," +
-		"\"sniffing\":{\"enabled\":true,\"destOverride\": [\"fakedns+others\"]}}"
-}
-
-func getAPInboundConfig(port int) string {
-	return "{\"listen\":\"127.0.0.1\",\"port\":" + strconv.Itoa(port) +
-		",\"protocol\":\"dokodemo-door\",\"tag\":\"api\"," +
-		"\"settings\":{\"address\":\"127.0.0.1\"}}"
-}
-
-func NewInstance(configPath string, assetPath string, enableAPI bool, logger Logger) (*Instance, error) {
+func NewInstance(configPath string, assetPath string, logger Logger) (*Instance, error) {
 	os.Setenv("XRAY_LOCATION_ASSET", assetPath)
-	os.Setenv("XRAY_LOCATION_CONFIG", configPath)
-	port, apiPort, err := getPort()
-	file, err := os.OpenFile(filepath.Join(configPath, "config.json"), os.O_RDONLY, 0)
+	os.Setenv("XRAY_LOCATION_CONFIG", filepath.Dir(configPath))
+	file, err := os.OpenFile(configPath, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err
 	}
+	registerLoader()
 	config, err := core.LoadConfig("json", file)
-	if err != nil {
-		return nil, err
-	}
-	json, err := decodeJSON(getInboundConfig(port))
-	if err != nil {
-		return nil, err
-	}
-	if enableAPI {
-		apiJson, err := decodeJSON(getAPInboundConfig(apiPort))
-		if err != nil {
-			return nil, err
-		}
-		config.Inbound = []*core.InboundHandlerConfig{json, apiJson}
-	} else {
-		apiPort = -1
-		config.Inbound = []*core.InboundHandlerConfig{json}
-	}
 	if err != nil {
 		return nil, err
 	}
@@ -179,9 +101,7 @@ func NewInstance(configPath string, assetPath string, enableAPI bool, logger Log
 	return &Instance{
 		instance:   instance,
 		configPath: configPath,
-		port:       port,
 		logger:     logContainer,
-		apiPort:    apiPort,
 	}, nil
 }
 
@@ -201,12 +121,4 @@ func (i *Instance) Stop() error {
 		return err
 	}
 	return nil
-}
-
-func (i *Instance) GetPort() int {
-	return i.port
-}
-
-func (i *Instance) GetAPIPort() int {
-	return i.apiPort
 }
