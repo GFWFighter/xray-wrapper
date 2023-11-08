@@ -32,9 +32,9 @@ type SpeedTest struct {
 	stopped  bool
 }
 
-func NewSpeedTest(delegate *SpeedTestDelegate) *SpeedTest {
+func NewSpeedTest(delegate SpeedTestDelegate) *SpeedTest {
 	return &SpeedTest{
-		delegate: delegate,
+		delegate: &delegate,
 		client:   &speedtestdotnet.Client{},
 		cancel:   nil,
 		stopped:  false,
