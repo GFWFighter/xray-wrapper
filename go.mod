@@ -5,8 +5,10 @@ go 1.21
 require (
 	github.com/moqsien/vpnparser v0.2.5
 	github.com/xtls/xray-core v1.8.4
+	go.jonnrb.io/speedtest v0.2.0
 	golang.org/x/mobile v0.0.0-20231006135142-2b44d11868fe
-	golang.org/x/sys v0.13.0
+	golang.org/x/sync v0.5.0
+	golang.org/x/sys v0.14.0
 )
 
 require (
@@ -34,6 +36,7 @@ require (
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/lithammer/fuzzysearch v1.1.8 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/moqsien/goutils v0.3.1 // indirect
 	github.com/onsi/ginkgo/v2 v2.12.0 // indirect
@@ -59,7 +62,7 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090 // indirect
 	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
