@@ -1,47 +1,47 @@
-package xray
+package XRay
 
 import (
 	"context"
-	"fmt"
-	"path"
-	"reflect"
 
 	statsService "github.com/xtls/xray-core/app/stats/command"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// query system stats and outbound stats.
-// server means The API server address, like "127.0.0.1:8080".
-// dir means the dir which result json will be wrote to.
-func QueryStats(server string) string {
+type ProxyStats struct {
+	Uplink   int64
+	Downlink int64
+}
+
+func GetProxyStats(server string) (*ProxyStats, error) {
 	conn, err := grpc.Dial(server, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
-		return err.Error()
+		return nil, err
 	}
 	defer conn.Close()
 
 	client := statsService.NewStatsServiceClient(conn)
 
-	sysStatsReq := &statsService.SysStatsRequest{}
-	sysStatsRes, err := client.GetSysStats(context.Background(), sysStatsReq)
-	if err != nil {
-		return err.Error()
+	upReq := &statsService.GetStatsRequest{
+		Name:   "outbound>>>proxy>>>traffic>>>uplink",
+		Reset_: false,
 	}
-	sysStatsPath := path.Join(dir, "sysStats.json")
-	err = writeResult(sysStatsRes, sysStatsPath)
+	upRes, err := client.GetStats(context.Background(), upReq)
 	if err != nil {
-		return err.Error()
+		return nil, err
 	}
 
-	statsReq := &statsService.QueryStatsRequest{
-		Pattern: "",
-		Reset_:  false,
+	dnReq := &statsService.GetStatsRequest{
+		Name:   "outbound>>>proxy>>>traffic>>>downlink",
+		Reset_: false,
 	}
-	statsRes, err := client.QueryStats(context.Background(), statsReq)
+	dnRes, err := client.GetStats(context.Background(), dnReq)
 	if err != nil {
-		return err.Error()
+		return nil, err
 	}
-	statsPath := path.Join(dir, "stats.json")
-	return statsRes
+
+	return &ProxyStats{
+		Uplink:   upRes.GetStat().GetValue(),
+		Downlink: dnRes.GetStat().GetValue(),
+	}, nil
 }

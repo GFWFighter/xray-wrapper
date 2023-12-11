@@ -1,7 +1,6 @@
 package XRay
 
 import (
-	"math"
 	"time"
 
 	runtimeDebug "runtime/debug"
@@ -16,11 +15,11 @@ func forceFree(interval time.Duration) {
 	}()
 }
 
-func InitForceFree(maxMemory int64, interval int) {
+func LimitMemory(maxMemory int64, refreshInterval int) {
 	runtimeDebug.SetGCPercent(10)
 	runtimeDebug.SetMemoryLimit(maxMemory)
-	if interval > 0 {
-		duration := time.Duration(interval) * time.Second
+	if refreshInterval > 0 {
+		duration := time.Duration(refreshInterval) * time.Second
 		forceFree(duration)
 	}
 }
