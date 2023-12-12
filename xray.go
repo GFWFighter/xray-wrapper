@@ -84,3 +84,25 @@ func (i *Instance) Stop() error {
 	}
 	return nil
 }
+
+func (i *Instance) ReloadConfig() error {
+	err := i.instance.Close()
+	if err != nil {
+		return err
+	}
+	file, err := os.OpenFile(i.configPath, os.O_RDONLY, 0)
+	if err != nil {
+		return err
+	}
+	config, err := core.LoadConfig("json", file)
+	if err != nil {
+		return err
+	}
+	instance, err := core.New(config)
+	if err != nil {
+		return err
+	}
+	log.RegisterHandler(i.logger)
+	i.instance = instance
+	return nil
+}
