@@ -90,6 +90,9 @@ func (i *Instance) ReloadConfig() error {
 	if err != nil {
 		return err
 	}
+	i.instance = nil
+	runtime.GC()
+	runtimeDebug.FreeOSMemory()
 	file, err := os.OpenFile(i.configPath, os.O_RDONLY, 0)
 	if err != nil {
 		return err
