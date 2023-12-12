@@ -12,7 +12,6 @@ import (
 
 	"github.com/xtls/xray-core/infra/conf"
 	json_reader "github.com/xtls/xray-core/infra/conf/json"
-	"github.com/xtls/xray-core/infra/conf/serial"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -45,11 +44,10 @@ func SwitchConfig(server string, config string) error {
 		return err
 	}
 
-	serial.LoadJSONConfig()
-
 	addReq := &handlerService.AddOutboundRequest{
 		Outbound: conf,
 	}
+
 	_, err = client.AddOutbound(context.Background(), addReq)
 	if err != nil {
 		return err
