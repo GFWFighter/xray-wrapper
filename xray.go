@@ -102,7 +102,7 @@ func (i *Instance) ReloadConfig() error {
 	if err != nil {
 		return err
 	}
-	log.RegisterHandler(i.logger)
+	// log.RegisterHandler(i.logger)
 	i.instance = instance
 	return nil
 }
